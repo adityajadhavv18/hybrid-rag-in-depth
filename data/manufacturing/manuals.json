@@ -1,0 +1,75 @@
+[
+  {
+    "doc_id": "franklin_subdrive",
+    "maker": "Franklin Electric",
+    "machine": "SubDrive75/100/150 constant pressure controller (submersible well pump)",
+    "pages_kept": [
+      1,
+      24
+    ],
+    "chars": 49723,
+    "headers_removed": []
+  },
+  {
+    "doc_id": "goulds_aquavar_solo2",
+    "maker": "Goulds Water Technology (Xylem)",
+    "machine": "Aquavar SOLO2 constant pressure controller",
+    "pages_kept": [
+      1,
+      20
+    ],
+    "chars": 70483,
+    "headers_removed": []
+  },
+  {
+    "doc_id": "goulds_aquavar_im043",
+    "maker": "Goulds Water Technology (Xylem)",
+    "machine": "Aquavar pump-mounted variable speed controller, V120 software",
+    "pages_kept": [
+      1,
+      84
+    ],
+    "chars": 130502,
+    "headers_removed": []
+  },
+  {
+    "doc_id": "goulds_im154",
+    "maker": "Goulds Water Technology (Xylem)",
+    "machine": "Aquavar variable speed pump control, new sizes addendum",
+    "pages_kept": [
+      1,
+      8
+    ],
+    "chars": 8222,
+    "headers_removed": [
+      "AQUAVAR"
+    ]
+  },
+  {
+    "doc_id": "danfoss_fc202",
+    "maker": "Danfoss",
+    "machine": "VLT AQUA Drive FC 202 (0.25-90 kW)",
+    "pages_kept": [
+      1,
+      92
+    ],
+    "chars": 231008,
+    "headers_removed": [
+      "Danfoss A/S \u00a9 10/2016 All rights reserved.",
+      "MG20MD02"
+    ]
+  },
+  {
+    "doc_id": "yaskawa_ga500_troubleshooting",
+    "maker": "Yaskawa",
+    "machine": "GA500 industrial AC microdrive",
+    "pages_kept": [
+      1,
+      282
+    ],
+    "chars": 713499,
+    "headers_removed": [
+      "YASKAWA TOEPYAIGA5001A GA500 Maintenance & Troubleshooting"
+    ]
+  }
+]

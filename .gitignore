@@ -1,0 +1,9 @@
+.venv/
+__pycache__/
+*.pyc
+.env
+.DS_Store
+qdrant_storage/
+# manufacturer manuals are copyrighted: commit the download script, not the files
+data/*/raw/
+data/*/text/
