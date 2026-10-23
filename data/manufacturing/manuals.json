@@ -7,8 +7,7 @@
       1,
       24
     ],
-    "chars": 49723,
-    "headers_removed": []
+    "chars": 48611
   },
   {
     "doc_id": "goulds_aquavar_solo2",
@@ -18,8 +17,7 @@
       1,
       20
     ],
-    "chars": 70483,
-    "headers_removed": []
+    "chars": 70437
   },
   {
     "doc_id": "goulds_aquavar_im043",
@@ -29,21 +27,7 @@
       1,
       84
     ],
-    "chars": 130502,
-    "headers_removed": []
-  },
-  {
-    "doc_id": "goulds_im154",
-    "maker": "Goulds Water Technology (Xylem)",
-    "machine": "Aquavar variable speed pump control, new sizes addendum",
-    "pages_kept": [
-      1,
-      8
-    ],
-    "chars": 8222,
-    "headers_removed": [
-      "AQUAVAR"
-    ]
+    "chars": 130312
   },
   {
     "doc_id": "danfoss_fc202",
@@ -53,11 +37,7 @@
       1,
       92
     ],
-    "chars": 231008,
-    "headers_removed": [
-      "Danfoss A/S \u00a9 10/2016 All rights reserved.",
-      "MG20MD02"
-    ]
+    "chars": 227179
   },
   {
     "doc_id": "yaskawa_ga500_troubleshooting",
@@ -67,9 +47,6 @@
       1,
       282
     ],
-    "chars": 713499,
-    "headers_removed": [
-      "YASKAWA TOEPYAIGA5001A GA500 Maintenance & Troubleshooting"
-    ]
+    "chars": 704685
   }
 ]
