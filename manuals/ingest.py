@@ -5,6 +5,11 @@
   bm25_code        bm25 over the code-tagged text (codes.py, r2)     -> "WARNING 23" also indexed as w23
   dense_named      dense over "Manual: <name>" + chunk (r2b)
   bm25_named       bm25_code over the named text (r2b)
+  splade_named     SPLADE: learned sparse, adds related words (r3)   -> "overheat" also lights up "temperature"
+  minicoil_named   miniCOIL: BM25 whose word weights know the word's sense (r3)
+  colbert_named    ColBERT: one 96-number vector PER TOKEN, scored token by token (MaxSim) (r4)
+
+Batches are small (8) because this runs on an 8 GB laptop: large batches of 300-token chunks swapped it to a halt.
 
 Rungs only change how we QUERY these vectors, so every rung searches the exact same chunks. Model outputs are
 cached by text hash (data/manufacturing/cache/), so re-indexing only embeds chunks whose text changed.
@@ -20,7 +25,7 @@ import time
 import uuid
 from pathlib import Path
 
-from fastembed import SparseTextEmbedding, TextEmbedding
+from fastembed import LateInteractionTextEmbedding, SparseTextEmbedding, TextEmbedding
 from fastembed.common.utils import remove_non_alphanumeric
 from qdrant_client import QdrantClient, models
 
@@ -30,9 +35,13 @@ from codes import with_codes
 QDRANT_URL = "http://localhost:6333"
 COLLECTION = "manuals_fixed"
 BM25_MODEL = "Qdrant/bm25"
+SPLADE_MODEL = "prithivida/Splade_PP_en_v1"
+MINICOIL_MODEL = "Qdrant/minicoil-v1"
+COLBERT_MODEL = "answerdotai/answerai-colbert-small-v1"
 DENSE, BM25, BM25_CODE = "dense", "bm25", "bm25_code"
 DENSE_NAMED, BM25_NAMED = "dense_named", "bm25_named"
-SPARSE_NAMES = {BM25, BM25_CODE, BM25_NAMED}
+SPLADE_NAMED, MINICOIL_NAMED, COLBERT_NAMED = "splade_named", "minicoil_named", "colbert_named"
+SPARSE_NAMES = {BM25, BM25_CODE, BM25_NAMED, SPLADE_NAMED, MINICOIL_NAMED}
 CACHE = Path(__file__).resolve().parent.parent / "data" / "manufacturing" / "cache"
 
 
@@ -83,12 +92,19 @@ def main():
     dense_model = TextEmbedding(EMBED_MODEL)
     embed_dense = lambda ts: dense_model.passage_embed(ts, batch_size=32)
     bm25 = lambda ts: list(SparseTextEmbedding(BM25_MODEL, avg_len=avg_words(ts)).embed(ts))  # fast: no cache
+    minicoil_len = avg_words(named_coded)
     vectors = {
         DENSE: cached(f"dense_{EMBED_MODEL}", plain, embed_dense),
         DENSE_NAMED: cached(f"dense_{EMBED_MODEL}", named_, embed_dense),
         BM25: bm25(plain),
         BM25_CODE: bm25(coded),
         BM25_NAMED: bm25(named_coded),
+        SPLADE_NAMED: cached(f"splade_{SPLADE_MODEL}", named_coded,
+                             lambda ts: SparseTextEmbedding(SPLADE_MODEL).embed(ts, batch_size=8)),
+        MINICOIL_NAMED: cached(f"minicoil_{MINICOIL_MODEL}_{minicoil_len:.1f}", named_coded,
+                               lambda ts: SparseTextEmbedding(MINICOIL_MODEL, avg_len=minicoil_len).embed(ts, batch_size=8)),
+        COLBERT_NAMED: cached(f"colbert_{COLBERT_MODEL}", named_,
+                              lambda ts: LateInteractionTextEmbedding(COLBERT_MODEL).embed(ts, batch_size=8)),
     }
     print(f"2. vectors: {', '.join(vectors)}")
 
@@ -101,13 +117,21 @@ def main():
         vectors_config={
             DENSE: models.VectorParams(size=dim, distance=models.Distance.COSINE),
             DENSE_NAMED: models.VectorParams(size=dim, distance=models.Distance.COSINE),
+            # ColBERT: many vectors per chunk, scored by MaxSim (each question token takes its best-matching
+            # chunk token, then sum). m=0 skips the HNSW graph: with 1.5k chunks an exact scan is fast enough.
+            COLBERT_NAMED: models.VectorParams(
+                size=len(vectors[COLBERT_NAMED][0][0]), distance=models.Distance.COSINE,
+                multivector_config=models.MultiVectorConfig(comparator=models.MultiVectorComparator.MAX_SIM),
+                hnsw_config=models.HnswConfigDiff(m=0), datatype=models.Datatype.FLOAT16),
         },
-        # BM25 vectors hold only the term-frequency half of the formula; Modifier.IDF makes Qdrant add the other
-        # half (how RARE each word is across all chunks) at query time
-        sparse_vectors_config={n: models.SparseVectorParams(modifier=models.Modifier.IDF) for n in SPARSE_NAMES},
+        # BM25-style vectors hold only the term-frequency half of the formula; Modifier.IDF makes Qdrant add the
+        # other half (how RARE each word is across all chunks) at query time. SPLADE weights are complete already.
+        sparse_vectors_config={n: models.SparseVectorParams(
+            modifier=None if n == SPLADE_NAMED else models.Modifier.IDF) for n in SPARSE_NAMES},
     )
     client.upload_points(
         COLLECTION,
+        # a generator, not a list: ColBERT's per-token vectors as Python floats would need >1 GB at once
         points=(
             models.PointStruct(
                 id=point_id(c.chunk_id),

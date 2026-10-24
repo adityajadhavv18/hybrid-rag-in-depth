@@ -22,13 +22,25 @@ from pathlib import Path
 
 from eval_harness import PipelineOutput, evaluate, load_golden
 
-from ingest import BM25_CODE, BM25_NAMED, DENSE_NAMED
-from retrieve import STAGE_MS, dense_search, rrf_fuse, sparse_search
+from ingest import BM25_CODE, BM25_NAMED, DENSE_NAMED, MINICOIL_NAMED, SPLADE_NAMED
+from retrieve import STAGE_MS, colbert_rescore, colbert_search, dense_search, rrf_fuse, sparse_search
 
 TUNE = "golden_manufacturing_tune_v1.jsonl"
 TOP_K = 5  # chunks the LLM will read
 CANDIDATES = 20  # how deep each retriever's list goes into fusion
 RESULTS = Path(__file__).resolve().parent / "results" / "ladder_tune.json"
+
+RRF_K = 20  # r5, from fusion_sweep.py (was the paper's 60)
+KEYWORD_WEIGHTS = {"bm25": 1.5, "splade": 1.5}  # r5: keyword lists count 1.5x the dense list
+RESCORE_POOL = 30  # fused candidates ColBERT re-scores in r4a
+
+
+def r3c_lists(q: str) -> list:
+    """The r3c stack's fused ranking, cut to the re-scoring pool."""
+    return rrf_fuse({"dense": dense_search(q, CANDIDATES, using=DENSE_NAMED),
+                     "bm25": sparse_search(q, CANDIDATES, using=BM25_NAMED),
+                     "splade": sparse_search(q, CANDIDATES, using=SPLADE_NAMED)})[:RESCORE_POOL]
+
 
 RUNGS = {
     "r0": ("dense only", lambda q, k: dense_search(q, k)),
@@ -39,6 +51,30 @@ RUNGS = {
     "r2b": ("+ manual name on every chunk", lambda q, k: rrf_fuse({
         "dense": dense_search(q, CANDIDATES, using=DENSE_NAMED),
         "bm25": sparse_search(q, CANDIDATES, using=BM25_NAMED)})[:k]),
+    # r3: which sparse ("keyword") retriever pairs best with dense? All on the r2b named + code-tagged text.
+    "r3a": ("SPLADE instead of BM25", lambda q, k: rrf_fuse({
+        "dense": dense_search(q, CANDIDATES, using=DENSE_NAMED),
+        "splade": sparse_search(q, CANDIDATES, using=SPLADE_NAMED)})[:k]),
+    "r3b": ("miniCOIL instead of BM25", lambda q, k: rrf_fuse({
+        "dense": dense_search(q, CANDIDATES, using=DENSE_NAMED),
+        "minicoil": sparse_search(q, CANDIDATES, using=MINICOIL_NAMED)})[:k]),
+    "r3c": ("BM25 + SPLADE together", lambda q, k: rrf_fuse({
+        "dense": dense_search(q, CANDIDATES, using=DENSE_NAMED),
+        "bm25": sparse_search(q, CANDIDATES, using=BM25_NAMED),
+        "splade": sparse_search(q, CANDIDATES, using=SPLADE_NAMED)})[:k]),
+    # r4: ColBERT on top of the r3 winner (r3c), two ways
+    "r4a": ("ColBERT re-scores fused top 30", lambda q, k: colbert_rescore(q, r3c_lists(q))[:k]),
+    "r4b": ("ColBERT as a 4th list in RRF", lambda q, k: rrf_fuse({
+        "dense": dense_search(q, CANDIDATES, using=DENSE_NAMED),
+        "bm25": sparse_search(q, CANDIDATES, using=BM25_NAMED),
+        "splade": sparse_search(q, CANDIDATES, using=SPLADE_NAMED),
+        "colbert": colbert_search(q, CANDIDATES)})[:k]),
+    # r5: fusion tuned by fusion_sweep.py. ColBERT (r4) did not earn its place, so this builds on r3c.
+    # The middle of the plateau the sweep found (k 10-20, keyword lists 1.5-2x dense), not its single best point.
+    "r5": ("r3c with tuned RRF (k=20, keyword x1.5)", lambda q, k: rrf_fuse({
+        "dense": dense_search(q, CANDIDATES, using=DENSE_NAMED),
+        "bm25": sparse_search(q, CANDIDATES, using=BM25_NAMED),
+        "splade": sparse_search(q, CANDIDATES, using=SPLADE_NAMED)}, k=RRF_K, weights=KEYWORD_WEIGHTS)[:k]),
 }
 
 
