@@ -5,6 +5,7 @@
                    BM25 / SPLADE / miniCOIL depending on `using`; code-tagged indexes also tag the question
   colbert_search   question tokens vs every chunk's tokens (MaxSim) over the whole collection
   colbert_rescore  the same scoring, but only over a given candidate list (re-ranks it)
+  rerank           a cross-encoder reads question + chunk TOGETHER and scores the pair; re-sorts the candidates
   rrf_fuse         merge ranked lists by Reciprocal Rank Fusion (ranks only, never raw scores)
   score_fuse       merge by normalised scores instead (rung 5 compares the two)
 """
@@ -16,9 +17,10 @@ from dataclasses import dataclass, field
 from functools import cache
 
 from fastembed import LateInteractionTextEmbedding, SparseTextEmbedding, TextEmbedding
+from fastembed.rerank.cross_encoder import TextCrossEncoder
 from qdrant_client import QdrantClient, models
 
-from chunks import EMBED_MODEL
+from chunks import EMBED_MODEL, MANUAL_NAMES
 from codes import with_codes
 from ingest import (BM25, BM25_CODE, BM25_MODEL, BM25_NAMED, COLBERT_MODEL, COLBERT_NAMED, COLLECTION, DENSE,
                     MINICOIL_MODEL, MINICOIL_NAMED, QDRANT_URL, SPLADE_MODEL, SPLADE_NAMED, point_id)
@@ -64,6 +66,11 @@ def _colbert() -> LateInteractionTextEmbedding:
 
 
 @cache
+def _cross_encoder(model: str) -> TextCrossEncoder:
+    return TextCrossEncoder(model)
+
+
+@cache
 def _qdrant() -> QdrantClient:
     return QdrantClient(url=QDRANT_URL)
 
@@ -104,6 +111,20 @@ def colbert_rescore(question: str, candidates: list[Hit]) -> list[Hit]:
             COLLECTION, query=_colbert_query(question), using=COLBERT_NAMED, limit=len(ids),
             query_filter=models.Filter(must=[models.HasIdCondition(has_id=ids)])).points
         return _hits(points)
+
+
+def rerank(question: str, candidates: list[Hit], model: str) -> list[Hit]:
+    """Re-sort candidates by a cross-encoder. Unlike every retriever above, which turns the question and the chunk
+    into vectors SEPARATELY and compares them, a cross-encoder reads both as one input
+    ("[CLS] question [SEP] chunk") and outputs a single relevance score, so it can see that a chunk EXPLAINS
+    CPF06 rather than just mentions it. Too slow to run over the whole corpus, fine over ~20 candidates.
+    The chunk is passed with its "Manual: <name>" line, as in the index text, so the model knows which machine."""
+    with timed("rerank"):
+        texts = [f"Manual: {MANUAL_NAMES[h.doc_id]}\n{h.text}" for h in candidates]
+        scores = list(_cross_encoder(model).rerank(question, texts, batch_size=8))  # 8 GB laptop: small batches
+        order = sorted(range(len(candidates)), key=lambda i: -scores[i])
+        return [Hit(candidates[i].chunk_id, candidates[i].doc_id, candidates[i].page, candidates[i].text, scores[i],
+                    candidates[i].ranks) for i in order]
 
 
 def rrf_fuse(ranked: dict[str, list[Hit]], k: int = 60, weights: dict[str, float] | None = None) -> list[Hit]:

@@ -23,7 +23,7 @@ from pathlib import Path
 from eval_harness import PipelineOutput, evaluate, load_golden
 
 from ingest import BM25_CODE, BM25_NAMED, DENSE_NAMED, MINICOIL_NAMED, SPLADE_NAMED, STRUCT_COLLECTION
-from retrieve import STAGE_MS, colbert_rescore, colbert_search, dense_search, rrf_fuse, sparse_search
+from retrieve import STAGE_MS, colbert_rescore, colbert_search, dense_search, rerank, rrf_fuse, sparse_search
 
 TUNE = "golden_manufacturing_tune_v1.jsonl"
 TOP_K = 5  # chunks the LLM will read
@@ -33,6 +33,14 @@ RESULTS = Path(__file__).resolve().parent / "results" / "ladder_tune.json"
 RRF_K = 20  # r5, from fusion_sweep.py (was the paper's 60)
 KEYWORD_WEIGHTS = {"bm25": 1.5, "splade": 1.5}  # r5: keyword lists count 1.5x the dense list
 RESCORE_POOL = 30  # fused candidates ColBERT re-scores in r4a
+RERANK_POOL = 20  # r7: fused r8 candidates the cross-encoder re-sorts (r8 has recall@20 = 1.0)
+RERANKERS = {  # r7 variants: FastEmbed cross-encoders, smallest first
+    "r7a": "Xenova/ms-marco-MiniLM-L-6-v2",
+    "r7b": "Xenova/ms-marco-MiniLM-L-12-v2",
+    "r7c": "jinaai/jina-reranker-v1-turbo-en",
+    "r7d": "BAAI/bge-reranker-base",
+    "r7e": "BAAI/bge-reranker-v2-m3-int8",
+}
 
 
 def r5_stack(q: str, k: int, collection: str | None = None) -> list:
@@ -84,6 +92,10 @@ RUNGS = {
     # r8: the same r5 search over structure-aware chunks (structure.py): one chunk per fault entry
     "r8": ("r5 on one-chunk-per-fault-entry", lambda q, k: r5_stack(q, k, STRUCT_COLLECTION)),
 }
+# r7: r8's fused top 20, re-sorted by a cross-encoder (no RRF after it: the reranker's order is final)
+for key, model in RERANKERS.items():
+    RUNGS[key] = (f"r8 + rerank top {RERANK_POOL}: {model.split('/')[1]}",
+                  lambda q, k, m=model: rerank(q, r5_stack(q, RERANK_POOL, STRUCT_COLLECTION), m)[:k])
 
 
 def norm(text: str) -> str:  # the harness's matching rule
