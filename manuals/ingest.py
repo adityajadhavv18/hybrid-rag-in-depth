@@ -17,6 +17,7 @@ cached by text hash (data/manufacturing/cache/), so re-indexing only embeds chun
 Run from hybrid_rag_in_depth/ (Qdrant must be running: docker start qdrant):
     uv run manuals/ingest.py            # fixed 300/50 chunks -> manuals_fixed, all 8 vectors
     uv run manuals/ingest.py --struct   # rung 8: one chunk per fault entry -> manuals_struct, the 3 vectors r5 uses
+    uv run manuals/ingest.py --struct --notes   # rung 9: + an LLM note per chunk in the index text (notes.py)
 """
 
 import hashlib
@@ -31,13 +32,14 @@ from fastembed import LateInteractionTextEmbedding, SparseTextEmbedding, TextEmb
 from fastembed.common.utils import remove_non_alphanumeric
 from qdrant_client import QdrantClient, models
 
-from chunks import EMBED_MODEL, load_chunks, named
+from chunks import EMBED_MODEL, MANUAL_NAMES, load_chunks, named
 from codes import with_codes
 from structure import load_struct_chunks
 
 QDRANT_URL = "http://localhost:6333"
 COLLECTION = "manuals_fixed"
 STRUCT_COLLECTION = "manuals_struct"  # rung 8
+NOTES_COLLECTION = "manuals_struct_notes"  # rung 9
 BM25_MODEL = "Qdrant/bm25"
 SPLADE_MODEL = "prithivida/Splade_PP_en_v1"
 MINICOIL_MODEL = "Qdrant/minicoil-v1"
@@ -85,12 +87,17 @@ def sparse(v) -> models.SparseVector:
     return models.SparseVector(indices=v.indices.tolist(), values=v.values.tolist())
 
 
-def main(struct: bool = False):
+def main(struct: bool = False, with_notes: bool = False):
     chunks = load_struct_chunks() if struct else load_chunks()
-    collection = STRUCT_COLLECTION if struct else COLLECTION
+    collection = NOTES_COLLECTION if with_notes else STRUCT_COLLECTION if struct else COLLECTION
     plain = [c.text for c in chunks]
     coded = [with_codes(t) for t in plain]
     named_ = [named(c) for c in chunks]
+    notes = {}
+    if with_notes:  # rung 9: the note sits between the manual line and the chunk, in the INDEX text only
+        from notes import build_notes  # needs the OpenAI key; only this path imports it
+        notes = build_notes(chunks)
+        named_ = [f"Manual: {MANUAL_NAMES[c.doc_id]}\n{notes[c.chunk_id]}\n{c.text}" for c in chunks]
     named_coded = [with_codes(t) for t in named_]
     print(f"1. chunks: {len(chunks)} from {len({c.doc_id for c in chunks})} manuals")
 
@@ -146,7 +153,8 @@ def main(struct: bool = False):
             models.PointStruct(
                 id=point_id(c.chunk_id),
                 vector={name: sparse(vs[i]) if name in SPARSE_NAMES else vs[i].tolist() for name, vs in vectors.items()},
-                payload={"chunk_id": c.chunk_id, "doc_id": c.doc_id, "page": c.page, "text": c.text},
+                payload={"chunk_id": c.chunk_id, "doc_id": c.doc_id, "page": c.page, "text": c.text,
+                         **({"note": notes[c.chunk_id]} if notes else {})},
             )
             for i, c in enumerate(chunks)
         ),
@@ -157,4 +165,4 @@ def main(struct: bool = False):
 
 
 if __name__ == "__main__":
-    main(struct="--struct" in sys.argv)
+    main(struct="--struct" in sys.argv or "--notes" in sys.argv, with_notes="--notes" in sys.argv)

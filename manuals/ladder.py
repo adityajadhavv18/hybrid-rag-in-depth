@@ -23,7 +23,8 @@ from pathlib import Path
 from eval_harness import PipelineOutput, evaluate, load_golden
 
 import hyde
-from ingest import BM25_CODE, BM25_NAMED, DENSE_NAMED, MINICOIL_NAMED, SPLADE_NAMED, STRUCT_COLLECTION
+from ingest import (BM25_CODE, BM25_NAMED, DENSE_NAMED, MINICOIL_NAMED, NOTES_COLLECTION, SPLADE_NAMED,
+                    STRUCT_COLLECTION)
 from retrieve import STAGE_MS, colbert_rescore, colbert_search, dense_search, rerank, rrf_fuse, sparse_search
 
 TUNE = "golden_manufacturing_tune_v1.jsonl"
@@ -99,6 +100,11 @@ RUNGS["r6a"] = ("r8 + HyDE: dense searches with the fake passage",
                 lambda q, k: r5_stack(q, k, STRUCT_COLLECTION, dense_vector=hyde.hyde_vector(q, mix_question=False)))
 RUNGS["r6b"] = ("r8 + HyDE: dense searches with mean(question, passage)",
                 lambda q, k: r5_stack(q, k, STRUCT_COLLECTION, dense_vector=hyde.hyde_vector(q, mix_question=True)))
+# r9: contextual notes (notes.py) in the index text of the r8 chunks. r9a isolates the notes (vs r8);
+# r9b is the full stack (vs r6a, the HyDE winner).
+RUNGS["r9a"] = ("r8 + LLM note per chunk in the index", lambda q, k: r5_stack(q, k, NOTES_COLLECTION))
+RUNGS["r9b"] = ("r6a (HyDE) + LLM note per chunk in the index",
+                lambda q, k: r5_stack(q, k, NOTES_COLLECTION, dense_vector=hyde.hyde_vector(q, mix_question=False)))
 # r7: r8's fused top 20, re-sorted by a cross-encoder (no RRF after it: the reranker's order is final)
 for key, model in RERANKERS.items():
     RUNGS[key] = (f"r8 + rerank top {RERANK_POOL}: {model.split('/')[1]}",
