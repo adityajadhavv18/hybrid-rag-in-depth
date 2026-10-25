@@ -80,9 +80,11 @@ def _hits(points) -> list[Hit]:
             for p in points]
 
 
-def dense_search(question: str, k: int, using: str = DENSE, collection: str = COLLECTION) -> list[Hit]:
+def dense_search(question: str, k: int, using: str = DENSE, collection: str = COLLECTION,
+                 vector: list[float] | None = None) -> list[Hit]:
+    """vector: search with this instead of the question's embedding (HyDE, rung 6)."""
     with timed(using):
-        vector = next(_dense().query_embed(question)).tolist()
+        vector = vector or next(_dense().query_embed(question)).tolist()
         return _hits(_qdrant().query_points(collection, query=vector, using=using, limit=k).points)
 
 

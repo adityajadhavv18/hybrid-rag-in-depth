@@ -22,6 +22,7 @@ from pathlib import Path
 
 from eval_harness import PipelineOutput, evaluate, load_golden
 
+import hyde
 from ingest import BM25_CODE, BM25_NAMED, DENSE_NAMED, MINICOIL_NAMED, SPLADE_NAMED, STRUCT_COLLECTION
 from retrieve import STAGE_MS, colbert_rescore, colbert_search, dense_search, rerank, rrf_fuse, sparse_search
 
@@ -43,10 +44,11 @@ RERANKERS = {  # r7 variants: FastEmbed cross-encoders, smallest first
 }
 
 
-def r5_stack(q: str, k: int, collection: str | None = None) -> list:
-    """The current best: dense + BM25 + SPLADE on named, code-tagged chunks, weighted RRF (k=20, keyword x1.5)."""
+def r5_stack(q: str, k: int, collection: str | None = None, dense_vector: list[float] | None = None) -> list:
+    """The current best: dense + BM25 + SPLADE on named, code-tagged chunks, weighted RRF (k=20, keyword x1.5).
+    dense_vector: what the dense list searches with instead of the question (HyDE); keyword lists keep the question."""
     where = {"collection": collection} if collection else {}
-    return rrf_fuse({"dense": dense_search(q, CANDIDATES, using=DENSE_NAMED, **where),
+    return rrf_fuse({"dense": dense_search(q, CANDIDATES, using=DENSE_NAMED, vector=dense_vector, **where),
                      "bm25": sparse_search(q, CANDIDATES, using=BM25_NAMED, **where),
                      "splade": sparse_search(q, CANDIDATES, using=SPLADE_NAMED, **where)},
                     k=RRF_K, weights=KEYWORD_WEIGHTS)[:k]
@@ -92,6 +94,11 @@ RUNGS = {
     # r8: the same r5 search over structure-aware chunks (structure.py): one chunk per fault entry
     "r8": ("r5 on one-chunk-per-fault-entry", lambda q, k: r5_stack(q, k, STRUCT_COLLECTION)),
 }
+# r6: HyDE (hyde.py) on the r8 winner. The LLM's fake manual passage feeds the dense list only.
+RUNGS["r6a"] = ("r8 + HyDE: dense searches with the fake passage",
+                lambda q, k: r5_stack(q, k, STRUCT_COLLECTION, dense_vector=hyde.hyde_vector(q, mix_question=False)))
+RUNGS["r6b"] = ("r8 + HyDE: dense searches with mean(question, passage)",
+                lambda q, k: r5_stack(q, k, STRUCT_COLLECTION, dense_vector=hyde.hyde_vector(q, mix_question=True)))
 # r7: r8's fused top 20, re-sorted by a cross-encoder (no RRF after it: the reranker's order is final)
 for key, model in RERANKERS.items():
     RUNGS[key] = (f"r8 + rerank top {RERANK_POOL}: {model.split('/')[1]}",
@@ -126,12 +133,19 @@ def run_rung(key: str) -> dict:
     label, search = RUNGS[key]
     STAGE_MS.clear()
 
+    llm_ms = {}  # question -> LLM time (HyDE) of a passage served from the cache, so cached runs show the real cost
+
     def pipeline(question: str) -> PipelineOutput:
+        hyde.USAGE.update(tokens_in=0, tokens_out=0, llm_ms=0.0)
         hits = search(question, TOP_K)
-        return PipelineOutput(answer="", contexts=[h.text for h in hits], context_ids=[h.doc_id for h in hits])
+        llm_ms[question] = hyde.USAGE["llm_ms"]
+        return PipelineOutput(answer="", contexts=[h.text for h in hits], context_ids=[h.doc_id for h in hits],
+                              tokens_in=hyde.USAGE["tokens_in"], tokens_out=hyde.USAGE["tokens_out"])
 
     run = evaluate(pipeline, arch=f"manuals_{key}", golden_set=TUNE, use_llm_judge=False, compare_to=None)
     stages = {s: round(statistics.median(ms), 1) for s, ms in STAGE_MS.items()}
+    if hyde.USAGE["tokens_in"]:  # an LLM rung: its call time, from the cache (the original call's time)
+        stages["llm"] = round(statistics.median(hyde._cache()[q]["ms"] for q in llm_ms), 1)
 
     golden = {g.id: g for g in load_golden(TUNE)}
     rows, by_cat = [], defaultdict(list)
@@ -149,13 +163,13 @@ def run_rung(key: str) -> dict:
         by_cat[g.id.split("-")[0]].append(row)
 
     mean = lambda rs, m: round(statistics.mean(r[m] for r in rs), 3)
-    lat = sorted(q.latency_ms for q in run.questions)
+    lat = sorted(q.latency_ms + llm_ms.get(golden[q.golden_id].question, 0.0) for q in run.questions)
     result = {
         "rung": key, "label": label, "questions": len(rows),
         "recall5": mean(rows, "recall5"), "mrr": mean(rows, "mrr"), "ndcg5": mean(rows, "ndcg5"),
         "recall20": mean(rows, "recall20"),
         "latency_p50_ms": round(statistics.median(lat), 1), "latency_p95_ms": round(lat[int(0.95 * (len(lat) - 1))], 1),
-        "stage_p50_ms": stages, "cost_per_query_usd": 0.0,
+        "stage_p50_ms": stages, "cost_per_query_usd": run.summary.get("cost_per_query_usd", 0.0),
         "by_category": {c: {"recall5": mean(rs, "recall5"), "mrr": mean(rs, "mrr"), "n": len(rs)}
                         for c, rs in sorted(by_cat.items())},
         "per_question": rows,
