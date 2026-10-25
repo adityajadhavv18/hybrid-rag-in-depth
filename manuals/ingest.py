@@ -15,12 +15,14 @@ Rungs only change how we QUERY these vectors, so every rung searches the exact s
 cached by text hash (data/manufacturing/cache/), so re-indexing only embeds chunks whose text changed.
 
 Run from hybrid_rag_in_depth/ (Qdrant must be running: docker start qdrant):
-    uv run manuals/ingest.py
+    uv run manuals/ingest.py            # fixed 300/50 chunks -> manuals_fixed, all 8 vectors
+    uv run manuals/ingest.py --struct   # rung 8: one chunk per fault entry -> manuals_struct, the 3 vectors r5 uses
 """
 
 import hashlib
 import pickle
 import statistics
+import sys
 import time
 import uuid
 from pathlib import Path
@@ -31,9 +33,11 @@ from qdrant_client import QdrantClient, models
 
 from chunks import EMBED_MODEL, load_chunks, named
 from codes import with_codes
+from structure import load_struct_chunks
 
 QDRANT_URL = "http://localhost:6333"
 COLLECTION = "manuals_fixed"
+STRUCT_COLLECTION = "manuals_struct"  # rung 8
 BM25_MODEL = "Qdrant/bm25"
 SPLADE_MODEL = "prithivida/Splade_PP_en_v1"
 MINICOIL_MODEL = "Qdrant/minicoil-v1"
@@ -81,8 +85,9 @@ def sparse(v) -> models.SparseVector:
     return models.SparseVector(indices=v.indices.tolist(), values=v.values.tolist())
 
 
-def main():
-    chunks = load_chunks()
+def main(struct: bool = False):
+    chunks = load_struct_chunks() if struct else load_chunks()
+    collection = STRUCT_COLLECTION if struct else COLLECTION
     plain = [c.text for c in chunks]
     coded = [with_codes(t) for t in plain]
     named_ = [named(c) for c in chunks]
@@ -90,47 +95,52 @@ def main():
     print(f"1. chunks: {len(chunks)} from {len({c.doc_id for c in chunks})} manuals")
 
     dense_model = TextEmbedding(EMBED_MODEL)
-    embed_dense = lambda ts: dense_model.passage_embed(ts, batch_size=32)
+    embed_dense = lambda ts: dense_model.passage_embed(ts, batch_size=8)
     bm25 = lambda ts: list(SparseTextEmbedding(BM25_MODEL, avg_len=avg_words(ts)).embed(ts))  # fast: no cache
     minicoil_len = avg_words(named_coded)
-    vectors = {
-        DENSE: cached(f"dense_{EMBED_MODEL}", plain, embed_dense),
-        DENSE_NAMED: cached(f"dense_{EMBED_MODEL}", named_, embed_dense),
-        BM25: bm25(plain),
-        BM25_CODE: bm25(coded),
-        BM25_NAMED: bm25(named_coded),
-        SPLADE_NAMED: cached(f"splade_{SPLADE_MODEL}", named_coded,
-                             lambda ts: SparseTextEmbedding(SPLADE_MODEL).embed(ts, batch_size=8)),
-        MINICOIL_NAMED: cached(f"minicoil_{MINICOIL_MODEL}_{minicoil_len:.1f}", named_coded,
-                               lambda ts: SparseTextEmbedding(MINICOIL_MODEL, avg_len=minicoil_len).embed(ts, batch_size=8)),
-        COLBERT_NAMED: cached(f"colbert_{COLBERT_MODEL}", named_,
-                              lambda ts: LateInteractionTextEmbedding(COLBERT_MODEL).embed(ts, batch_size=8)),
+    build = {  # name -> how to compute it; only the vectors this collection needs are computed
+        DENSE: lambda: cached(f"dense_{EMBED_MODEL}", plain, embed_dense),
+        DENSE_NAMED: lambda: cached(f"dense_{EMBED_MODEL}", named_, embed_dense),
+        BM25: lambda: bm25(plain),
+        BM25_CODE: lambda: bm25(coded),
+        BM25_NAMED: lambda: bm25(named_coded),
+        SPLADE_NAMED: lambda: cached(f"splade_{SPLADE_MODEL}", named_coded,
+                                     lambda ts: SparseTextEmbedding(SPLADE_MODEL).embed(ts, batch_size=8)),
+        MINICOIL_NAMED: lambda: cached(f"minicoil_{MINICOIL_MODEL}_{minicoil_len:.1f}", named_coded,
+                                       lambda ts: SparseTextEmbedding(MINICOIL_MODEL, avg_len=minicoil_len)
+                                       .embed(ts, batch_size=8)),
+        COLBERT_NAMED: lambda: cached(f"colbert_{COLBERT_MODEL}", named_,
+                                      lambda ts: LateInteractionTextEmbedding(COLBERT_MODEL).embed(ts, batch_size=8)),
     }
+    names = [DENSE_NAMED, BM25_NAMED, SPLADE_NAMED] if struct else list(build)  # rung 8 runs only the r5 stack
+    vectors = {name: build[name]() for name in names}
     print(f"2. vectors: {', '.join(vectors)}")
 
     client = QdrantClient(url=QDRANT_URL, timeout=300)
-    if client.collection_exists(COLLECTION):
-        client.delete_collection(COLLECTION)
-    dim = len(vectors[DENSE][0])
+    if client.collection_exists(collection):
+        client.delete_collection(collection)
+    dim = len(vectors[DENSE_NAMED][0])
+    dense_configs = {
+        DENSE: models.VectorParams(size=dim, distance=models.Distance.COSINE),
+        DENSE_NAMED: models.VectorParams(size=dim, distance=models.Distance.COSINE),
+    }
+    if COLBERT_NAMED in vectors:
+        # ColBERT: many vectors per chunk, scored by MaxSim (each question token takes its best-matching
+        # chunk token, then sum). m=0 skips the HNSW graph: with 1.5k chunks an exact scan is fast enough.
+        dense_configs[COLBERT_NAMED] = models.VectorParams(
+            size=len(vectors[COLBERT_NAMED][0][0]), distance=models.Distance.COSINE,
+            multivector_config=models.MultiVectorConfig(comparator=models.MultiVectorComparator.MAX_SIM),
+            hnsw_config=models.HnswConfigDiff(m=0), datatype=models.Datatype.FLOAT16)
     client.create_collection(
-        COLLECTION,
-        vectors_config={
-            DENSE: models.VectorParams(size=dim, distance=models.Distance.COSINE),
-            DENSE_NAMED: models.VectorParams(size=dim, distance=models.Distance.COSINE),
-            # ColBERT: many vectors per chunk, scored by MaxSim (each question token takes its best-matching
-            # chunk token, then sum). m=0 skips the HNSW graph: with 1.5k chunks an exact scan is fast enough.
-            COLBERT_NAMED: models.VectorParams(
-                size=len(vectors[COLBERT_NAMED][0][0]), distance=models.Distance.COSINE,
-                multivector_config=models.MultiVectorConfig(comparator=models.MultiVectorComparator.MAX_SIM),
-                hnsw_config=models.HnswConfigDiff(m=0), datatype=models.Datatype.FLOAT16),
-        },
+        collection,
+        vectors_config={n: cfg for n, cfg in dense_configs.items() if n in vectors},
         # BM25-style vectors hold only the term-frequency half of the formula; Modifier.IDF makes Qdrant add the
         # other half (how RARE each word is across all chunks) at query time. SPLADE weights are complete already.
         sparse_vectors_config={n: models.SparseVectorParams(
-            modifier=None if n == SPLADE_NAMED else models.Modifier.IDF) for n in SPARSE_NAMES},
+            modifier=None if n == SPLADE_NAMED else models.Modifier.IDF) for n in SPARSE_NAMES if n in vectors},
     )
     client.upload_points(
-        COLLECTION,
+        collection,
         # a generator, not a list: ColBERT's per-token vectors as Python floats would need >1 GB at once
         points=(
             models.PointStruct(
@@ -143,8 +153,8 @@ def main():
         batch_size=32,
         wait=True,
     )
-    print(f"3. stored: {client.count(COLLECTION, exact=True).count} points in '{COLLECTION}'")
+    print(f"3. stored: {client.count(collection, exact=True).count} points in '{collection}'")
 
 
 if __name__ == "__main__":
-    main()
+    main(struct="--struct" in sys.argv)

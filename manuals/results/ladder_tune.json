@@ -2125,12 +2125,12 @@
     "mrr": 0.791,
     "ndcg5": 0.78,
     "recall20": 0.913,
-    "latency_p50_ms": 60.8,
-    "latency_p95_ms": 81.6,
+    "latency_p50_ms": 49.8,
+    "latency_p95_ms": 102.9,
     "stage_p50_ms": {
-      "dense_named": 15.9,
-      "bm25_named": 4.7,
-      "splade_named": 38.8,
+      "dense_named": 12.5,
+      "bm25_named": 3.4,
+      "splade_named": 35.2,
       "fuse": 0.1
     },
     "cost_per_query_usd": 0.0,
@@ -2326,6 +2326,242 @@
         "ndcg5": 0.0,
         "recall20": 0.0,
         "rank20": null
+      },
+      {
+        "id": "multi-02",
+        "recall5": 1.0,
+        "mrr": 1.0,
+        "ndcg5": 0.6131471927654584,
+        "recall20": 1.0,
+        "rank20": 1
+      },
+      {
+        "id": "multi-03",
+        "recall5": 1.0,
+        "mrr": 1.0,
+        "ndcg5": 0.6131471927654584,
+        "recall20": 1.0,
+        "rank20": 1
+      },
+      {
+        "id": "multi-04",
+        "recall5": 1.0,
+        "mrr": 0.5,
+        "ndcg5": 0.6934264036172708,
+        "recall20": 1.0,
+        "rank20": 2
+      }
+    ]
+  },
+  "r8": {
+    "rung": "r8",
+    "label": "r5 on one-chunk-per-fault-entry",
+    "questions": 23,
+    "recall5": 1.0,
+    "mrr": 0.804,
+    "ndcg5": 0.823,
+    "recall20": 1.0,
+    "latency_p50_ms": 47.9,
+    "latency_p95_ms": 58.0,
+    "stage_p50_ms": {
+      "dense_named": 13.0,
+      "bm25_named": 3.1,
+      "splade_named": 31.3,
+      "fuse": 0.1
+    },
+    "cost_per_query_usd": 0.0,
+    "by_category": {
+      "code": {
+        "recall5": 1.0,
+        "mrr": 0.917,
+        "n": 6
+      },
+      "look": {
+        "recall5": 1.0,
+        "mrr": 0.667,
+        "n": 3
+      },
+      "multi": {
+        "recall5": 1.0,
+        "mrr": 0.833,
+        "n": 3
+      },
+      "spell": {
+        "recall5": 1.0,
+        "mrr": 0.583,
+        "n": 3
+      },
+      "sym": {
+        "recall5": 1.0,
+        "mrr": 0.9,
+        "n": 5
+      },
+      "twin": {
+        "recall5": 1.0,
+        "mrr": 0.75,
+        "n": 3
+      }
+    },
+    "per_question": [
+      {
+        "id": "code-01",
+        "recall5": 1.0,
+        "mrr": 1.0,
+        "ndcg5": 1.0,
+        "recall20": 1.0,
+        "rank20": 1
+      },
+      {
+        "id": "code-03",
+        "recall5": 1.0,
+        "mrr": 1.0,
+        "ndcg5": 1.0,
+        "recall20": 1.0,
+        "rank20": 1
+      },
+      {
+        "id": "code-05",
+        "recall5": 1.0,
+        "mrr": 1.0,
+        "ndcg5": 1.0,
+        "recall20": 1.0,
+        "rank20": 1
+      },
+      {
+        "id": "code-07",
+        "recall5": 1.0,
+        "mrr": 1.0,
+        "ndcg5": 1.0,
+        "recall20": 1.0,
+        "rank20": 1
+      },
+      {
+        "id": "code-08",
+        "recall5": 1.0,
+        "mrr": 0.5,
+        "ndcg5": 0.6309297535714575,
+        "recall20": 1.0,
+        "rank20": 2
+      },
+      {
+        "id": "code-09",
+        "recall5": 1.0,
+        "mrr": 1.0,
+        "ndcg5": 1.0,
+        "recall20": 1.0,
+        "rank20": 1
+      },
+      {
+        "id": "sym-01",
+        "recall5": 1.0,
+        "mrr": 1.0,
+        "ndcg5": 1.0,
+        "recall20": 1.0,
+        "rank20": 1
+      },
+      {
+        "id": "sym-03",
+        "recall5": 1.0,
+        "mrr": 1.0,
+        "ndcg5": 1.0,
+        "recall20": 1.0,
+        "rank20": 1
+      },
+      {
+        "id": "sym-05",
+        "recall5": 1.0,
+        "mrr": 1.0,
+        "ndcg5": 1.0,
+        "recall20": 1.0,
+        "rank20": 1
+      },
+      {
+        "id": "sym-06",
+        "recall5": 1.0,
+        "mrr": 1.0,
+        "ndcg5": 1.0,
+        "recall20": 1.0,
+        "rank20": 1
+      },
+      {
+        "id": "sym-08",
+        "recall5": 1.0,
+        "mrr": 0.5,
+        "ndcg5": 0.6309297535714575,
+        "recall20": 1.0,
+        "rank20": 2
+      },
+      {
+        "id": "look-01",
+        "recall5": 1.0,
+        "mrr": 0.5,
+        "ndcg5": 0.6309297535714575,
+        "recall20": 1.0,
+        "rank20": 2
+      },
+      {
+        "id": "look-03",
+        "recall5": 1.0,
+        "mrr": 1.0,
+        "ndcg5": 1.0,
+        "recall20": 1.0,
+        "rank20": 1
+      },
+      {
+        "id": "look-04",
+        "recall5": 1.0,
+        "mrr": 0.5,
+        "ndcg5": 0.6309297535714575,
+        "recall20": 1.0,
+        "rank20": 2
+      },
+      {
+        "id": "twin-01",
+        "recall5": 1.0,
+        "mrr": 0.25,
+        "ndcg5": 0.43067655807339306,
+        "recall20": 1.0,
+        "rank20": 4
+      },
+      {
+        "id": "twin-03",
+        "recall5": 1.0,
+        "mrr": 1.0,
+        "ndcg5": 1.0,
+        "recall20": 1.0,
+        "rank20": 1
+      },
+      {
+        "id": "twin-04",
+        "recall5": 1.0,
+        "mrr": 1.0,
+        "ndcg5": 1.0,
+        "recall20": 1.0,
+        "rank20": 1
+      },
+      {
+        "id": "spell-01",
+        "recall5": 1.0,
+        "mrr": 0.5,
+        "ndcg5": 0.6309297535714575,
+        "recall20": 1.0,
+        "rank20": 2
+      },
+      {
+        "id": "spell-02",
+        "recall5": 1.0,
+        "mrr": 1.0,
+        "ndcg5": 1.0,
+        "recall20": 1.0,
+        "rank20": 1
+      },
+      {
+        "id": "spell-03",
+        "recall5": 1.0,
+        "mrr": 0.25,
+        "ndcg5": 0.43067655807339306,
+        "recall20": 1.0,
+        "rank20": 4
       },
       {
         "id": "multi-02",

@@ -22,7 +22,7 @@ from pathlib import Path
 
 from eval_harness import PipelineOutput, evaluate, load_golden
 
-from ingest import BM25_CODE, BM25_NAMED, DENSE_NAMED, MINICOIL_NAMED, SPLADE_NAMED
+from ingest import BM25_CODE, BM25_NAMED, DENSE_NAMED, MINICOIL_NAMED, SPLADE_NAMED, STRUCT_COLLECTION
 from retrieve import STAGE_MS, colbert_rescore, colbert_search, dense_search, rrf_fuse, sparse_search
 
 TUNE = "golden_manufacturing_tune_v1.jsonl"
@@ -33,6 +33,15 @@ RESULTS = Path(__file__).resolve().parent / "results" / "ladder_tune.json"
 RRF_K = 20  # r5, from fusion_sweep.py (was the paper's 60)
 KEYWORD_WEIGHTS = {"bm25": 1.5, "splade": 1.5}  # r5: keyword lists count 1.5x the dense list
 RESCORE_POOL = 30  # fused candidates ColBERT re-scores in r4a
+
+
+def r5_stack(q: str, k: int, collection: str | None = None) -> list:
+    """The current best: dense + BM25 + SPLADE on named, code-tagged chunks, weighted RRF (k=20, keyword x1.5)."""
+    where = {"collection": collection} if collection else {}
+    return rrf_fuse({"dense": dense_search(q, CANDIDATES, using=DENSE_NAMED, **where),
+                     "bm25": sparse_search(q, CANDIDATES, using=BM25_NAMED, **where),
+                     "splade": sparse_search(q, CANDIDATES, using=SPLADE_NAMED, **where)},
+                    k=RRF_K, weights=KEYWORD_WEIGHTS)[:k]
 
 
 def r3c_lists(q: str) -> list:
@@ -71,10 +80,9 @@ RUNGS = {
         "colbert": colbert_search(q, CANDIDATES)})[:k]),
     # r5: fusion tuned by fusion_sweep.py. ColBERT (r4) did not earn its place, so this builds on r3c.
     # The middle of the plateau the sweep found (k 10-20, keyword lists 1.5-2x dense), not its single best point.
-    "r5": ("r3c with tuned RRF (k=20, keyword x1.5)", lambda q, k: rrf_fuse({
-        "dense": dense_search(q, CANDIDATES, using=DENSE_NAMED),
-        "bm25": sparse_search(q, CANDIDATES, using=BM25_NAMED),
-        "splade": sparse_search(q, CANDIDATES, using=SPLADE_NAMED)}, k=RRF_K, weights=KEYWORD_WEIGHTS)[:k]),
+    "r5": ("r3c with tuned RRF (k=20, keyword x1.5)", lambda q, k: r5_stack(q, k)),
+    # r8: the same r5 search over structure-aware chunks (structure.py): one chunk per fault entry
+    "r8": ("r5 on one-chunk-per-fault-entry", lambda q, k: r5_stack(q, k, STRUCT_COLLECTION)),
 }
 
 

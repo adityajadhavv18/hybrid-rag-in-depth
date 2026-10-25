@@ -73,17 +73,17 @@ def _hits(points) -> list[Hit]:
             for p in points]
 
 
-def dense_search(question: str, k: int, using: str = DENSE) -> list[Hit]:
+def dense_search(question: str, k: int, using: str = DENSE, collection: str = COLLECTION) -> list[Hit]:
     with timed(using):
         vector = next(_dense().query_embed(question)).tolist()
-        return _hits(_qdrant().query_points(COLLECTION, query=vector, using=using, limit=k).points)
+        return _hits(_qdrant().query_points(collection, query=vector, using=using, limit=k).points)
 
 
-def sparse_search(question: str, k: int, using: str = BM25) -> list[Hit]:
+def sparse_search(question: str, k: int, using: str = BM25, collection: str = COLLECTION) -> list[Hit]:
     with timed(using):
         sp = next(_sparse(SPARSE_MODEL[using]).query_embed(with_codes(question) if using in CODE_TAGGED else question))
         query = models.SparseVector(indices=sp.indices.tolist(), values=sp.values.tolist())
-        return _hits(_qdrant().query_points(COLLECTION, query=query, using=using, limit=k).points)
+        return _hits(_qdrant().query_points(collection, query=query, using=using, limit=k).points)
 
 
 def _colbert_query(question: str) -> list[list[float]]:
