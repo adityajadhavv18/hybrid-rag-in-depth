@@ -1,0 +1,633 @@
+{
+  "golden_set": "golden_manufacturing_test_v1.jsonl",
+  "note": "held-out test split, run once: uv run manuals/answer.py r0 r6a --judge --test",
+  "r0": {
+    "harness_file": "manuals_r0_answer_20261027-120543.json",
+    "llm_model": "gpt-4o-mini",
+    "judge_model": "gpt-4o-mini",
+    "summary": {
+      "n_questions": 15.0,
+      "error_rate": 0.0,
+      "abstention": 1.0,
+      "answer_relevancy": 0.5102,
+      "context_precision": 0.4843,
+      "context_recall": 0.5641,
+      "doc_hit": 1.0,
+      "doc_mrr": 0.891,
+      "evidence_mrr": 0.2115,
+      "evidence_recall": 0.3077,
+      "faithfulness": 0.8056,
+      "false_refusal_rate": 0.3077,
+      "latency_mean_ms": 1948.7792,
+      "latency_p50_ms": 1496.838,
+      "latency_p95_ms": 4445.5916,
+      "cost_total_usd": 0.0042,
+      "cost_per_query_usd": 0.0003,
+      "judge_cost_usd": 0.0333
+    },
+    "by_category": {
+      "code": {
+        "n": 4,
+        "evidence_recall": 0.5,
+        "evidence_mrr": 0.375,
+        "faithfulness": 0.611,
+        "answer_relevancy": 0.612,
+        "context_precision": 0.375,
+        "context_recall": 0.5,
+        "refused": 0.25
+      },
+      "look": {
+        "n": 2,
+        "evidence_recall": 0.0,
+        "evidence_mrr": 0.0,
+        "faithfulness": 0.667,
+        "answer_relevancy": 0.465,
+        "context_precision": 0.0,
+        "context_recall": 0.0,
+        "refused": 0.5
+      },
+      "multi": {
+        "n": 1,
+        "evidence_recall": 1.0,
+        "evidence_mrr": 0.25,
+        "faithfulness": 0.75,
+        "answer_relevancy": 0.957,
+        "context_precision": 0.25,
+        "context_recall": 1.0,
+        "refused": 0.0
+      },
+      "none": {
+        "n": 2,
+        "abstention": 1.0
+      },
+      "spell": {
+        "n": 1,
+        "evidence_recall": 1.0,
+        "evidence_mrr": 1.0,
+        "faithfulness": 1.0,
+        "answer_relevancy": 0.993,
+        "context_precision": 1.0,
+        "context_recall": 1.0,
+        "refused": 0.0
+      },
+      "sym": {
+        "n": 3,
+        "evidence_recall": 0.0,
+        "evidence_mrr": 0.0,
+        "faithfulness": 1.0,
+        "answer_relevancy": 0.2,
+        "context_precision": 0.81,
+        "context_recall": 0.889,
+        "refused": 0.333
+      },
+      "twin": {
+        "n": 2,
+        "evidence_recall": 0.0,
+        "evidence_mrr": 0.0,
+        "faithfulness": 1.0,
+        "answer_relevancy": 0.351,
+        "context_precision": 0.558,
+        "context_recall": 0.333,
+        "refused": 0.5
+      }
+    },
+    "questions": [
+      {
+        "id": "code-02",
+        "scores": {
+          "doc_hit": 1.0,
+          "doc_mrr": 1.0,
+          "evidence_recall": 1.0,
+          "evidence_mrr": 0.5,
+          "cost_usd": 0.0,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.77,
+          "context_precision": 0.5,
+          "context_recall": 1.0,
+          "refused": 0.0
+        },
+        "answer": "ALARM 29 indicates that the maximum temperature of the heat sink has been exceeded. The temperature fault does not reset until the temperature drops below a defined heat sink temperature.\n\nYou should check for the following conditions:\n- Ambient temperature too high.\n- Motor cable too long.\n- Incorrect airflow clearance above and below the frequency converter.\n- Blocked airflow around the frequency converter.\n- Damaged heat sink fan.\n- Dirty heat sink.\n\nAdditionally, check the fan resistance, soft charge fuses, and the IGBT thermal sensor [2]."
+      },
+      {
+        "id": "code-04",
+        "scores": {
+          "doc_hit": 1.0,
+          "doc_mrr": 1.0,
+          "evidence_recall": 0.0,
+          "evidence_mrr": 0.0,
+          "cost_usd": 0.0,
+          "faithfulness": 0.0,
+          "answer_relevancy": 0.869,
+          "context_precision": 0.0,
+          "context_recall": 0.0,
+          "refused": 0.0
+        },
+        "answer": "The GF fault code on the Yaskawa GA500 indicates a ground fault. \n\nCauses of the GF fault code include:\n- A short circuit between the drive output terminals and ground.\n- A short circuit in the motor winding.\n- A fault in the wiring or connections.\n\nFixes for the GF fault code include:\n- Checking the wiring and connections for any shorts or faults.\n- Inspecting the motor for any winding issues.\n- Ensuring that there are no ground faults in the system. \n\nPlease refer to the manual for detailed troubleshooting steps."
+      },
+      {
+        "id": "code-06",
+        "scores": {
+          "doc_hit": 1.0,
+          "doc_mrr": 1.0,
+          "evidence_recall": 0.0,
+          "evidence_mrr": 0.0,
+          "cost_usd": 0.0,
+          "answer_relevancy": 0.0,
+          "context_precision": 0.0,
+          "context_recall": 0.0,
+          "refused": 1.0
+        },
+        "answer": "I don't know based on the provided documents."
+      },
+      {
+        "id": "code-10",
+        "scores": {
+          "doc_hit": 1.0,
+          "doc_mrr": 1.0,
+          "evidence_recall": 1.0,
+          "evidence_mrr": 1.0,
+          "cost_usd": 0.0,
+          "faithfulness": 0.833,
+          "answer_relevancy": 0.811,
+          "context_precision": 1.0,
+          "context_recall": 1.0,
+          "refused": 0.0
+        },
+        "answer": "Error 6 is a \"Watchdog Error.\" \n\nCauses:\n- This error indicates a failure of the oscillator for the processor.\n\nFix:\n- Turn the unit off for at least 30 seconds and then back on. If the error is displayed again, contact your Goulds Pumps AQUAVAR distributor with an exact description of the fault [1]."
+      },
+      {
+        "id": "sym-02",
+        "scores": {
+          "doc_hit": 1.0,
+          "doc_mrr": 1.0,
+          "evidence_recall": 0.0,
+          "evidence_mrr": 0.0,
+          "cost_usd": 0.0,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.0,
+          "context_precision": 0.679,
+          "context_recall": 0.667,
+          "refused": 0.0
+        },
+        "answer": "The fault code indicates that there may be issues with pressure regulation. Causes for pressure fluctuations can include:\n\n1. **Improper system setup**: Ensure that the system components are correctly installed and compatible.\n2. **Pressure sensor malfunction**: Check if the Franklin Electric pressure sensor is functioning properly.\n3. **Water demand changes**: Rapid changes in water demand can cause pressure swings.\n\nFixes to consider:\n\n1. **Verify installation**: Confirm that the system is set up according to the specifications in the manual [2].\n2. **Inspect the pressure sensor**: Ensure the pressure sensor is accurately measuring pressure and is not damaged [4].\n3. **Adjust system settings**: If necessary, adjust the pressure settings to better accommodate the water demand [3].\n\nIf these checks do not resolve the issue, further diagnostics may be needed."
+      },
+      {
+        "id": "sym-04",
+        "scores": {
+          "doc_hit": 1.0,
+          "doc_mrr": 1.0,
+          "evidence_recall": 0.0,
+          "evidence_mrr": 0.0,
+          "cost_usd": 0.0,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.6,
+          "context_precision": 0.75,
+          "context_recall": 1.0,
+          "refused": 0.0
+        },
+        "answer": "The fault code is oL2, which indicates a Drive Overload.\n\n**Causes:**\n1. The load is too large.\n2. The acceleration/deceleration times or cycle times are too short.\n3. The load inertia is too large.\n\n**Possible Solutions:**\n1. Decrease the load.\n2. Examine and increase the acceleration/deceleration times set in C1-01 to C1-08.\n3. Increase the value set in n8-55 to address the load inertia.\n4. Replace the drive and motor with larger capacity models if necessary.\n\nMake sure to perform a Fault Reset to clear the fault after making adjustments [1][4]."
+      },
+      {
+        "id": "sym-07",
+        "scores": {
+          "doc_hit": 1.0,
+          "doc_mrr": 0.333,
+          "evidence_recall": 0.0,
+          "evidence_mrr": 0.0,
+          "cost_usd": 0.0,
+          "answer_relevancy": 0.0,
+          "context_precision": 1.0,
+          "context_recall": 1.0,
+          "refused": 1.0
+        },
+        "answer": "I don't know based on the provided documents."
+      },
+      {
+        "id": "look-02",
+        "scores": {
+          "doc_hit": 1.0,
+          "doc_mrr": 1.0,
+          "evidence_recall": 0.0,
+          "evidence_mrr": 0.0,
+          "cost_usd": 0.0,
+          "faithfulness": 0.667,
+          "answer_relevancy": 0.93,
+          "context_precision": 0.0,
+          "context_recall": 0.0,
+          "refused": 0.0
+        },
+        "answer": "The fault code oL1 on the Yaskawa GA500 indicates an overload condition. It can be reset when the Auto Restart function is enabled for oL1, which is controlled by the setting in L5-07 (Fault Reset Enable Select Grp1). \n\nTo reset oL1, ensure that the corresponding digit in L5-07 is set to '1' (enabled). The possible settings range from 0000 (disabled) to 1111 (enabled for all). \n\nIf the fault occurs, a Fault Reset should be performed to clear the fault [5]."
+      },
+      {
+        "id": "look-05",
+        "scores": {
+          "doc_hit": 1.0,
+          "doc_mrr": 1.0,
+          "evidence_recall": 0.0,
+          "evidence_mrr": 0.0,
+          "cost_usd": 0.0,
+          "answer_relevancy": 0.0,
+          "context_precision": 0.0,
+          "context_recall": 0.0,
+          "refused": 1.0
+        },
+        "answer": "I don't know based on the provided documents."
+      },
+      {
+        "id": "twin-02",
+        "scores": {
+          "doc_hit": 1.0,
+          "doc_mrr": 1.0,
+          "evidence_recall": 0.0,
+          "evidence_mrr": 0.0,
+          "cost_usd": 0.0,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.702,
+          "context_precision": 0.917,
+          "context_recall": 0.667,
+          "refused": 0.0
+        },
+        "answer": "The fault indicated by 2 flashes is \"UNDERVOLTAGE.\" \n\nPossible causes include:\n- Low line voltage\n- Misconnected input leads\n\nCorrective actions are:\n- Ensure line voltage is normal operating range (190 to 260 VAC); if low, address the voltage issue.\n- Check and correct any misconnected input leads [1]."
+      },
+      {
+        "id": "twin-05",
+        "scores": {
+          "doc_hit": 1.0,
+          "doc_mrr": 1.0,
+          "evidence_recall": 0.0,
+          "evidence_mrr": 0.0,
+          "cost_usd": 0.0,
+          "answer_relevancy": 0.0,
+          "context_precision": 0.2,
+          "context_recall": 0.0,
+          "refused": 1.0
+        },
+        "answer": "I don't know based on the provided documents."
+      },
+      {
+        "id": "spell-04",
+        "scores": {
+          "doc_hit": 1.0,
+          "doc_mrr": 1.0,
+          "evidence_recall": 1.0,
+          "evidence_mrr": 1.0,
+          "cost_usd": 0.0,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.993,
+          "context_precision": 1.0,
+          "context_recall": 1.0,
+          "refused": 0.0
+        },
+        "answer": "The rated output current of the Aquavar controller part no. 04168371 is 9 A [1]."
+      },
+      {
+        "id": "multi-01",
+        "scores": {
+          "doc_hit": 1.0,
+          "doc_mrr": 0.25,
+          "evidence_recall": 1.0,
+          "evidence_mrr": 0.25,
+          "cost_usd": 0.0,
+          "faithfulness": 0.75,
+          "answer_relevancy": 0.957,
+          "context_precision": 0.25,
+          "context_recall": 1.0,
+          "refused": 0.0
+        },
+        "answer": "For the Aquavar SOLO2, after an F04 over current fault, it can take up to 15 minutes (900 seconds) for the controller to automatically attempt to restart the motor. If three overcurrent faults are detected, the controller will no longer attempt to restart, and it will display \"RSET.\" At this point, the controller must be manually reset by turning power off to the controller for 1 minute before power is restored [4]."
+      },
+      {
+        "id": "none-02",
+        "scores": {
+          "cost_usd": 0.0,
+          "abstention": 1.0
+        },
+        "answer": "I don't know based on the provided documents."
+      },
+      {
+        "id": "none-04",
+        "scores": {
+          "cost_usd": 0.0,
+          "abstention": 1.0
+        },
+        "answer": "I don't know based on the provided documents."
+      }
+    ]
+  },
+  "r6a": {
+    "harness_file": "manuals_r6a_answer_20261027-120647.json",
+    "llm_model": "gpt-4o-mini",
+    "judge_model": "gpt-4o-mini",
+    "summary": {
+      "n_questions": 15.0,
+      "error_rate": 0.0,
+      "abstention": 1.0,
+      "answer_relevancy": 0.7513,
+      "context_precision": 0.8535,
+      "context_recall": 0.8718,
+      "doc_hit": 1.0,
+      "doc_mrr": 1.0,
+      "evidence_mrr": 0.7308,
+      "evidence_recall": 0.7692,
+      "faithfulness": 0.8975,
+      "false_refusal_rate": 0.0769,
+      "latency_mean_ms": 2088.0275,
+      "latency_p50_ms": 1876.4793,
+      "latency_p95_ms": 3801.58,
+      "cost_total_usd": 0.0048,
+      "cost_per_query_usd": 0.0003,
+      "judge_cost_usd": 0.0322
+    },
+    "by_category": {
+      "code": {
+        "n": 4,
+        "evidence_recall": 1.0,
+        "evidence_mrr": 0.875,
+        "faithfulness": 0.958,
+        "answer_relevancy": 0.88,
+        "context_precision": 0.75,
+        "context_recall": 1.0,
+        "refused": 0.0
+      },
+      "look": {
+        "n": 2,
+        "evidence_recall": 1.0,
+        "evidence_mrr": 1.0,
+        "faithfulness": 0.833,
+        "answer_relevancy": 0.879,
+        "context_precision": 0.958,
+        "context_recall": 1.0,
+        "refused": 0.0
+      },
+      "multi": {
+        "n": 1,
+        "evidence_recall": 1.0,
+        "evidence_mrr": 1.0,
+        "faithfulness": 1.0,
+        "answer_relevancy": 0.861,
+        "context_precision": 1.0,
+        "context_recall": 1.0,
+        "refused": 0.0
+      },
+      "none": {
+        "n": 2,
+        "abstention": 1.0
+      },
+      "spell": {
+        "n": 1,
+        "evidence_recall": 1.0,
+        "evidence_mrr": 1.0,
+        "faithfulness": 1.0,
+        "answer_relevancy": 0.993,
+        "context_precision": 1.0,
+        "context_recall": 1.0,
+        "refused": 0.0
+      },
+      "sym": {
+        "n": 3,
+        "evidence_recall": 0.333,
+        "evidence_mrr": 0.333,
+        "faithfulness": 0.757,
+        "answer_relevancy": 0.673,
+        "context_precision": 0.893,
+        "context_recall": 0.667,
+        "refused": 0.0
+      },
+      "twin": {
+        "n": 2,
+        "evidence_recall": 0.5,
+        "evidence_mrr": 0.5,
+        "faithfulness": 1.0,
+        "answer_relevancy": 0.309,
+        "context_precision": 0.75,
+        "context_recall": 0.667,
+        "refused": 0.5
+      }
+    },
+    "questions": [
+      {
+        "id": "code-02",
+        "scores": {
+          "doc_hit": 1.0,
+          "doc_mrr": 1.0,
+          "evidence_recall": 1.0,
+          "evidence_mrr": 1.0,
+          "cost_usd": 0.0,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.813,
+          "context_precision": 1.0,
+          "context_recall": 1.0,
+          "refused": 0.0
+        },
+        "answer": "ALARM 29 means that the maximum temperature of the heat sink has been exceeded. \n\nCauses to check:\n- Ambient temperature too high.\n- Motor cable too long.\n- Incorrect airflow clearance above and below the frequency converter.\n- Blocked airflow around the frequency converter.\n- Damaged heat sink fan.\n- Dirty heat sink.\n\nFixes to consider:\n- Check the fan resistance.\n- Check the soft charge fuses.\n- Check the IGBT thermal sensor. \n\n[1]"
+      },
+      {
+        "id": "code-04",
+        "scores": {
+          "doc_hit": 1.0,
+          "doc_mrr": 1.0,
+          "evidence_recall": 1.0,
+          "evidence_mrr": 1.0,
+          "cost_usd": 0.0,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.898,
+          "context_precision": 0.75,
+          "context_recall": 1.0,
+          "refused": 0.0
+        },
+        "answer": "The GF code on the Yaskawa GA500 indicates a Ground Fault. \n\nCauses:\n1. Overheating caused damage to the motor or the motor insulation is not satisfactory.\n2. The motor main circuit cable is contacting ground, creating a short circuit.\n3. An increase in the stray capacitance of the cable and the ground terminal caused an increase in the leakage current.\n4. There was a problem with the drive hardware.\n\nFixes:\n1. Measure the motor insulation resistance, and replace the motor if there is electrical conduction or unserviceable insulation.\n2. Examine the motor main circuit cable for damage, and repair short circuits.\n3. Measure the resistance between the motor main circuit cable and the ground terminal. If there is electrical conduction, replace the cable.\n4. If the wiring length of the cable is more than 100 m, decrease the carrier frequency and decrease the stray capacitance.\n5. Replace the control board or the drive if there is a hardware issue. For information about replacing the control board, contact Yaskawa or your nearest sales representative.\n6. Do a Fault Reset to clear the fault. [1]"
+      },
+      {
+        "id": "code-06",
+        "scores": {
+          "doc_hit": 1.0,
+          "doc_mrr": 1.0,
+          "evidence_recall": 1.0,
+          "evidence_mrr": 1.0,
+          "cost_usd": 0.0,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.812,
+          "context_precision": 0.75,
+          "context_recall": 1.0,
+          "refused": 0.0
+        },
+        "answer": "Fault F08 (8 Blinks) indicates an \"Open Lead.\" \n\nCauses:\n- Disconnected or broken wire between the controller and motor.\n\nFixes:\n1. Verify the error by turning power to the controller off for 1 minute and then on. \n2. If the error persists, check the motor and wiring between the controller and motor.\n3. Turn power off for 5 minutes, remove the three motor wires from the terminal block, and measure the resistance from phase to phase using an ohmmeter. A disconnected or broken wire will show a high resistance reading (20 ohms or higher).\n4. The controller will not restart if displaying this fault. To clear the fault, perform a System Reset or turn off power to the controller, wait 1 minute, and turn on power to the controller. If the fault persists, contact the installer [1]."
+      },
+      {
+        "id": "code-10",
+        "scores": {
+          "doc_hit": 1.0,
+          "doc_mrr": 1.0,
+          "evidence_recall": 1.0,
+          "evidence_mrr": 0.5,
+          "cost_usd": 0.0,
+          "faithfulness": 0.833,
+          "answer_relevancy": 0.994,
+          "context_precision": 0.5,
+          "context_recall": 1.0,
+          "refused": 0.0
+        },
+        "answer": "Error 6 on the Goulds Aquavar (V120) controller is a Watchdog Error. \n\nCauses:\n- This error indicates a failure of the oscillator for the processor.\n\nFixes:\n- If Error 6 occurs, turn the unit off for at least 30 seconds and then back on. If the error is displayed again, contact your Goulds Pumps AQUAVAR distributor with an exact description of the fault [2]."
+      },
+      {
+        "id": "sym-02",
+        "scores": {
+          "doc_hit": 1.0,
+          "doc_mrr": 1.0,
+          "evidence_recall": 0.0,
+          "evidence_mrr": 0.0,
+          "cost_usd": 0.0,
+          "faithfulness": 0.714,
+          "answer_relevancy": 0.665,
+          "context_precision": 1.0,
+          "context_recall": 0.0,
+          "refused": 0.0
+        },
+        "answer": "The fault code indicates a potential issue with \"Leaky Systems.\" \n\n**Causes:**\n- Leaky water systems might keep the controller running due to the accurate pressure sensing capability of the pressure sensor.\n\n**Fixes:**\n- To reduce the on-time of the controller/pump/motor, a \u201cBump-Mode\u201d procedure is installed. This feature periodically increases the system pressure slightly above the set point and shuts off the pump, allowing time to bleed off before the system starts up again.\n\nYou should check for leaks in the water system that may be causing the pressure fluctuations [1]."
+      },
+      {
+        "id": "sym-04",
+        "scores": {
+          "doc_hit": 1.0,
+          "doc_mrr": 1.0,
+          "evidence_recall": 0.0,
+          "evidence_mrr": 0.0,
+          "cost_usd": 0.0,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.589,
+          "context_precision": 0.679,
+          "context_recall": 1.0,
+          "refused": 0.0
+        },
+        "answer": "The fault code STPo (Motor Step-Out Detected) indicates that the motor code is set incorrectly for PM Control Methods or that the load is too large. \n\nCauses:\n1. The motor code is set incorrectly.\n2. The load is too large.\n3. The load inertia is too large.\n4. The acceleration/deceleration times are too short.\n5. Speed response is too slow.\n\nFixes:\n1. Set E5-01 [PM Motor Code Selection] correctly as specified by the motor.\n2. Increase the value set in n8-55 [Motor to Load Inertia Ratio].\n3. Increase the value set in n8-51 [Pull-in Current @ Acceleration].\n4. If the drive detects STPo during deceleration, set the value of n8-79 [Pull-in Current @ Deceleration] lower than n8-51.\n5. Decrease the load.\n6. Replace the drive and motor with larger capacity models.\n7. Increase the values set in C1-01 to C1-08 [Acceleration/Deceleration Times].\n8. Increase the value set in C2-01 [S-Curve Time @ Start of Accel].\n9. Do a Fault Reset to clear the fault [4]."
+      },
+      {
+        "id": "sym-07",
+        "scores": {
+          "doc_hit": 1.0,
+          "doc_mrr": 1.0,
+          "evidence_recall": 1.0,
+          "evidence_mrr": 1.0,
+          "cost_usd": 0.0,
+          "faithfulness": 0.556,
+          "answer_relevancy": 0.764,
+          "context_precision": 1.0,
+          "context_recall": 1.0,
+          "refused": 0.0
+        },
+        "answer": "The fault code indicates that the motor is running in the wrong direction. \n\nCauses:\n1. Motor rotation limit settings may be incorrect.\n2. An active reversing signal may be programmed.\n3. Wrong motor phase connection.\n\nFixes:\n1. Check that parameter 4-10 Motor Speed Direction is programmed correctly and adjust as necessary.\n2. Check if a reversing command is programmed for the terminal in parameter group 5-1* Digital inputs and deactivate it if needed.\n3. Verify the motor phase connection as per chapter 5.5 Checking Motor Rotation [1]."
+      },
+      {
+        "id": "look-02",
+        "scores": {
+          "doc_hit": 1.0,
+          "doc_mrr": 1.0,
+          "evidence_recall": 1.0,
+          "evidence_mrr": 1.0,
+          "cost_usd": 0.0,
+          "faithfulness": 0.667,
+          "answer_relevancy": 0.938,
+          "context_precision": 0.917,
+          "context_recall": 1.0,
+          "refused": 0.0
+        },
+        "answer": "oL1 means \"Motor Overload\" on the Yaskawa GA500. It indicates that the load is too large for the motor. \n\nIt can be reset when U4-16 [Motor oL1 Level] is less than 100 [1]."
+      },
+      {
+        "id": "look-05",
+        "scores": {
+          "doc_hit": 1.0,
+          "doc_mrr": 1.0,
+          "evidence_recall": 1.0,
+          "evidence_mrr": 1.0,
+          "cost_usd": 0.0,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.82,
+          "context_precision": 1.0,
+          "context_recall": 1.0,
+          "refused": 0.0
+        },
+        "answer": "ALARM 31 means \"Motor phase V missing.\" \n\nCauses:\n- Motor phase V between the frequency converter and the motor is missing.\n\nFixes:\n- Remove power from the frequency converter and check motor phase V. [1]"
+      },
+      {
+        "id": "twin-02",
+        "scores": {
+          "doc_hit": 1.0,
+          "doc_mrr": 1.0,
+          "evidence_recall": 1.0,
+          "evidence_mrr": 1.0,
+          "cost_usd": 0.0,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.618,
+          "context_precision": 1.0,
+          "context_recall": 1.0,
+          "refused": 0.0
+        },
+        "answer": "The fault is UNDERVOLTAGE. \n\nPossible causes:\n- Low line voltage\n- Misconnected input leads\n\nCorrective actions:\n- Line voltage low, less than approximately 150 VAC (normal operating range = 190 to 260 VAC)\n- Check incoming power connections and correct or tighten if necessary\n- Correct incoming voltage - check circuit breaker or fuses, contact power company [1]."
+      },
+      {
+        "id": "twin-05",
+        "scores": {
+          "doc_hit": 1.0,
+          "doc_mrr": 1.0,
+          "evidence_recall": 0.0,
+          "evidence_mrr": 0.0,
+          "cost_usd": 0.0,
+          "answer_relevancy": 0.0,
+          "context_precision": 0.5,
+          "context_recall": 0.333,
+          "refused": 1.0
+        },
+        "answer": "I don't know based on the provided documents."
+      },
+      {
+        "id": "spell-04",
+        "scores": {
+          "doc_hit": 1.0,
+          "doc_mrr": 1.0,
+          "evidence_recall": 1.0,
+          "evidence_mrr": 1.0,
+          "cost_usd": 0.0,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.993,
+          "context_precision": 1.0,
+          "context_recall": 1.0,
+          "refused": 0.0
+        },
+        "answer": "The rated output current of the Aquavar controller part no. 04168371 is 9 A [1]."
+      },
+      {
+        "id": "multi-01",
+        "scores": {
+          "doc_hit": 1.0,
+          "doc_mrr": 1.0,
+          "evidence_recall": 1.0,
+          "evidence_mrr": 1.0,
+          "cost_usd": 0.0,
+          "faithfulness": 1.0,
+          "answer_relevancy": 0.861,
+          "context_precision": 1.0,
+          "context_recall": 1.0,
+          "refused": 0.0
+        },
+        "answer": "The controller can take up to 15 minutes (900 seconds) to automatically attempt to restart the motor after an F04 over current fault. After three overcurrent faults are detected, the controller will no longer attempt to restart and will display RSET. At this point, the controller must be manually reset by turning power off to the controller for 1 minute before restoring power to attempt a restart again [1][2]."
+      },
+      {
+        "id": "none-02",
+        "scores": {
+          "cost_usd": 0.0,
+          "abstention": 1.0
+        },
+        "answer": "I don't know based on the provided documents."
+      },
+      {
+        "id": "none-04",
+        "scores": {
+          "cost_usd": 0.0,
+          "abstention": 1.0
+        },
+        "answer": "I don't know based on the provided documents."
+      }
+    ]
+  }
+}
